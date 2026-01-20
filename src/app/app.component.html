@@ -1,0 +1,217 @@
+<div class="container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1>📈 Financyfied Dashboard</h1>
+      <p>Real-time market data and analytics</p>
+    </div>
+    <div class="search-container">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTicker" 
+        placeholder="Search ticker (e.g., AAPL)" 
+        (keyup.enter)="searchStock()"
+      />
+      <button (click)="searchStock()">Search</button>
+    </div>
+  </header>
+
+  <!-- Market Indices -->
+  <section class="indices-section">
+    <h2>Market Indices</h2>
+    <div class="indices-grid">
+      <div *ngIf="loading.indices" class="loading">Loading indices...</div>
+      <div *ngFor="let index of marketIndices" class="index-card">
+        <h3>{{ index.name }}</h3>
+        <div class="index-price">{{ formatNumber(index.price) }}</div>
+        <div [class]="'index-change ' + getChangeClass(index.change)">
+          <span>{{ index.change >= 0 ? '▲' : '▼' }}</span>
+          {{ formatNumber(Math.abs(index.change)) }} ({{ formatNumber(Math.abs(index.changePercent)) }}%)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gainers & Losers -->
+  <section class="gainers-losers-section">
+    <div class="gainers-losers-grid">
+      <div class="card">
+        <h3>🚀 Top Gainers</h3>
+        <div class="stock-list">
+          <div *ngIf="loading.gainersLosers" class="loading">Loading...</div>
+          <div 
+            *ngFor="let stock of gainers" 
+            class="stock-item"
+            (click)="selectTrendingStock(stock.ticker)"
+          >
+            <div class="stock-info">
+              <strong>{{ stock.ticker }}</strong>
+              <span class="stock-name">{{ stock.name }}</span>
+            </div>
+            <div class="stock-price">
+              <div>{{ formatNumber(stock.price) }}</div>
+              <div class="positive">
+                ▲ {{ formatNumber(stock.changePercent) }}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📉 Top Losers</h3>
+        <div class="stock-list">
+          <div *ngIf="loading.gainersLosers" class="loading">Loading...</div>
+          <div 
+            *ngFor="let stock of losers" 
+            class="stock-item"
+            (click)="selectTrendingStock(stock.ticker)"
+          >
+            <div class="stock-info">
+              <strong>{{ stock.ticker }}</strong>
+              <span class="stock-name">{{ stock.name }}</span>
+            </div>
+            <div class="stock-price">
+              <div>{{ formatNumber(stock.price) }}</div>
+              <div class="negative">
+                ▼ {{ formatNumber(Math.abs(stock.changePercent)) }}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trending Stocks -->
+  <section class="trending-section">
+    <h2>🔥 Trending Stocks</h2>
+    <div class="trending-grid">
+      <div *ngIf="loading.trending" class="loading">Loading trending stocks...</div>
+      <div 
+        *ngFor="let stock of trendingStocks" 
+        class="trending-card"
+        (click)="selectTrendingStock(stock.ticker)"
+      >
+        <div class="trending-header">
+          <strong>{{ stock.ticker }}</strong>
+          <span class="trending-name">{{ stock.name }}</span>
+        </div>
+        <div class="trending-price">{{ formatNumber(stock.price) }}</div>
+        <div [class]="'trending-change ' + getChangeClass(stock.change)">\n          <span>{{ stock.change >= 0 ? '▲' : '▼' }}</span>
+          {{ formatNumber(Math.abs(stock.change)) }} ({{ formatNumber(Math.abs(stock.changePercent)) }}%)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stock Details Section -->
+  <section *ngIf="selectedStock" class="stock-details-section">
+    <div class="stock-details-card">
+      <h2>{{ selectedStock.ticker }} - {{ selectedStock.name }}</h2>
+      
+      <div class="stock-main-info">
+        <div class="stock-price-large">{{ formatNumber(selectedStock.currentPrice) }}</div>
+        <div [class]="'stock-change-large ' + getChangeClass(selectedStock.change)">
+          <span>{{ selectedStock.change >= 0 ? '▲' : '▼' }}</span>
+          {{ formatNumber(Math.abs(selectedStock.change)) }} ({{ formatNumber(Math.abs(selectedStock.changePercent)) }}%)
+        </div>
+      </div>
+
+      <div class="stock-info-grid">
+        <div class="info-item">
+          <label>Volume</label>
+          <span>{{ formatLargeNumber(selectedStock.volume) }}</span>
+        </div>
+        <div class="info-item">
+          <label>Market Cap</label>
+          <span>{{ formatLargeNumber(selectedStock.marketCap) }}</span>
+        </div>
+        <div class="info-item">
+          <label>P/E Ratio</label>
+          <span>{{ formatNumber(selectedStock.peRatio) }}</span>
+        </div>
+        <div class="info-item">
+          <label>52W High</label>
+          <span>{{ formatNumber(selectedStock.high52Week) }}</span>
+        </div>
+        <div class="info-item">
+          <label>52W Low</label>
+          <span>{{ formatNumber(selectedStock.low52Week) }}</span>
+        </div>
+        <div class="info-item">
+          <label>Dividend Yield</label>
+          <span>{{ formatNumber(selectedStock.dividendYield) }}%</span>
+        </div>
+      </div>
+
+      <div class="stock-description">
+        <h3>About</h3>
+        <p><strong>Sector:</strong> {{ selectedStock.sector }}</p>
+        <p><strong>Industry:</strong> {{ selectedStock.industry }}</p>
+        <p>{{ selectedStock.description }}</p>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="chart-section">
+        <div class="chart-controls">
+          <div class="controls-header">
+            <h3>📊 Historical Performance</h3>
+            <div class="chart-type-toggle">
+              <span class="toggle-label">Chart Type:</span>
+              <button 
+                class="chart-type-btn" 
+                [class.active]="chartType === 'line'"
+                (click)="changeChartType('line')"
+              >Line</button>
+              <button 
+                class="chart-type-btn" 
+                [class.active]="chartType === 'candlestick'"
+                (click)="changeChartType('candlestick')"
+              >Candlestick</button>
+            </div>
+          </div>
+          
+          <div class="period-selector-container">
+            <label class="selector-label">Time Period:</label>
+            <div class="period-selector">
+              <button 
+                *ngFor="let period of periods"
+                [class.active]="selectedPeriod === period.value"
+                (click)="changePeriod(period.value)"
+              >
+                {{ period.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <div *ngIf="loading.chart" class="loading">Loading chart...</div>
+          <canvas *ngIf="chartData && !loading.chart" id="stockChart"></canvas>
+        </div>
+
+        <div class="export-section">
+          <div class="export-info">
+            <span class="export-label">📥 Export Data</span>
+            <span class="export-description">Download historical data for analysis</span>
+          </div>
+          <div class="export-buttons">
+            <button (click)="exportData('csv')" class="export-btn csv-btn">
+              <span class="btn-icon">📄</span>
+              <span>CSV</span>
+            </button>
+            <button (click)="exportData('json')" class="export-btn json-btn">
+              <span class="btn-icon">📋</span>
+              <span>JSON</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Powered by yfinance | Data provided for informational purposes only</p>
+  </footer>
+</div>

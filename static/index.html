@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financyfied Dashboard - Market Data & Analytics</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📈 Financyfied Dashboard</h1>
+                <p>Real-time market data and analytics</p>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search ticker (e.g., AAPL)" />
+                <button onclick="searchStock()">Search</button>
+            </div>
+        </header>
+
+        <!-- Market Indices -->
+        <section class="indices-section">
+            <h2>Market Indices</h2>
+            <div id="indicesContainer" class="indices-grid">
+                <div class="loading">Loading indices...</div>
+            </div>
+        </section>
+
+        <!-- Gainers & Losers -->
+        <section class="gainers-losers-section">
+            <div class="gainers-losers-grid">
+                <div class="card">
+                    <h3>🚀 Top Gainers</h3>
+                    <div id="gainersContainer" class="stock-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>📉 Top Losers</h3>
+                    <div id="losersContainer" class="stock-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trending Stocks -->
+        <section class="trending-section">
+            <h2>🔥 Trending Stocks</h2>
+            <div id="trendingContainer" class="trending-grid">
+                <div class="loading">Loading trending stocks...</div>
+            </div>
+        </section>
+
+        <!-- Stock Details Modal -->
+        <div id="stockModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div id="stockDetails">
+                    <div class="loading">Loading stock details...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Modal -->
+        <div id="chartModal" class="modal">
+            <div class="modal-content chart-modal-content">
+                <span class="close" onclick="closeChartModal()">&times;</span>
+                <div id="chartContainer">
+                    <div class="chart-controls">
+                        <h2 id="chartTitle">Stock Chart</h2>
+                        <div class="period-selector">
+                            <button onclick="updateChart('1d')">1D</button>
+                            <button onclick="updateChart('5d')">5D</button>
+                            <button onclick="updateChart('1mo')" class="active">1M</button>
+                            <button onclick="updateChart('3mo')">3M</button>
+                            <button onclick="updateChart('6mo')">6M</button>
+                            <button onclick="updateChart('1y')">1Y</button>
+                            <button onclick="updateChart('5y')">5Y</button>
+                        </div>
+                    </div>
+                    <canvas id="stockChart"></canvas>
+                    <div class="export-buttons">
+                        <button onclick="exportData('csv')">📥 Export CSV</button>
+                        <button onclick="exportData('json')">📥 Export JSON</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by yfinance | Data provided for informational purposes only</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
